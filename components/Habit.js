@@ -1,16 +1,34 @@
 import React from 'react';
 import { StyleSheet, Text, View, Pressable, TouchableOpacity } from 'react-native';
 
-const Habit = ({ edit, habit }) => {
+const getStreak = (today, completed, habit) => {
+  let streak = completed ? 1 : 0;
+  let last_date = today;
+  for (let i = habit.dates.length - 1; i >= 0; --i) {
+    const date = habit.dates[i];
+    if (date === today && completed) continue;
+
+    let diff_in_seconds = last_date.getTime() - date.getTime();
+    let diff_in_days = diff_in_seconds / (1000 * 3600 * 24);
+    if (diff_in_days !== 1) {
+      break;
+    }
+    streak += 1;
+    last_date = date;
+  }
+  return streak;
+};
+
+const Habit = ({ edit, habit, completed, today }) => {
   return (
     <View style={styles.item}>
       <View style={styles.itemLeft}>
         <View style={edit ? styles.remove : styles.square}>
-          <Text style={{ color: "#FFF" }}>{edit ? "-" : habit.streak}</Text>
+          <Text style={{ color: "#FFF" }}>{edit ? "-" : getStreak(today, completed, habit)}</Text>
         </View>
         <Text style={styles.itemText}>{habit.text}</Text>
       </View>
-      <View style={habit.completed ? styles.circularCompleted : styles.circularToComplete}></View>
+      <View style={completed ? styles.circularCompleted : styles.circularToComplete}></View>
     </View>
   );
 };

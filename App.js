@@ -4,13 +4,35 @@ import { StatusBar } from 'expo-status-bar';
 import { Alert, StyleSheet, Text, ScrollView, View, Pressable, TextInput, KeyboardAvoidingView, Keyboard, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import Habit from './components/Habit';
 
+const now = () => {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
+
+const indexOfToday = (dates) => {
+  for (let i = 0; i < dates.length; ++i) {
+    const date = dates[i];
+    if (today.getFullYear() == date.getFullYear() && today.getMonth() == date.getMonth() && today.getDate() == date.getDate()) {
+      return i;
+    }
+  }
+
+  return -1;
+};
+
+const hasToday = (dates) => {
+  return indexOfToday(dates) !== -1;
+};
+
 const createHabit = (text) => {
   return {
     text,
-    completed: false,
-    streak: 0,
+    dates: [],
   };
 };
+
+const today = now();
 
 export default function App() {
   const [edit, setEdit] = useState(false);
@@ -39,13 +61,12 @@ export default function App() {
 
   const toggleHabit = (index) => {
     let habitsCopy = [...habits];
-    let completed = habitsCopy[index].completed;
-    if (completed) {
-      habitsCopy[index].streak -= 1;
+    let ind = indexOfToday(habitsCopy[index].dates);
+    if (ind !== -1) {
+      habitsCopy[index].dates.splice(ind, 1);
     } else {
-      habitsCopy[index].streak += 1;
+      habitsCopy[index].dates.push(today);
     }
-    habitsCopy[index].completed = !completed;
     setHabits(habitsCopy);
   };
 
@@ -70,7 +91,7 @@ export default function App() {
               habits.map((habit, index) => {
                 return (
                   <TouchableOpacity key={index} onPress={() => handleHabit(index) }>
-                    <Habit edit={edit} habit={habit} />
+                    <Habit edit={edit} habit={habit} completed={hasToday(habit.dates)} today={today} />
                   </TouchableOpacity>
                 );
               })
