@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, ScrollView, View, Pressable, TextInput, KeyboardAvoidingView, Keyboard, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, ScrollView, View, Pressable, TextInput, KeyboardAvoidingView, Keyboard, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import Habit from './components/Habit';
 
 const createHabit = (text) => {
@@ -46,11 +46,13 @@ export default function App() {
   };
 
   const handleHabit = (index) => {
+    Keyboard.dismiss();
     if (edit) { removeHabit(index); } else { toggleHabit(index); };
   };
 
   return (
     <View style={styles.container}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.habitsWrapper}>
         <View style={styles.header}>
           <Text style={styles.sectionTitle}>Your Habits</Text>
@@ -72,6 +74,7 @@ export default function App() {
           </View>
         </ScrollView>
       </View>
+    </TouchableWithoutFeedback>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}
                             style={styles.writeHabitWrapper}>
         <TextInput style={styles.input} placeholder={'Write a habit'} value={habit} onChangeText={(text) => setHabit(text)}/>
