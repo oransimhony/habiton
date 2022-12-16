@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { StatusBar } from 'expo-status-bar';
 import { Alert, StyleSheet, Text, ScrollView, View, Pressable, TextInput, KeyboardAvoidingView, Keyboard, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import Habit from './components/Habit';
 
 const now = () => {
@@ -32,16 +35,45 @@ const createHabit = (text) => {
   };
 };
 
+const saveHabits = async (habits) => {
+  try {
+    const jsonValue = JSON.stringify(habits);
+    await AsyncStorage.setItem('habits', jsonValue);
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+const loadHabits = async () => {
+  try {
+    const jsonValue = await AsyncStorage.getItem('habits');
+    if (jsonValue === null) {
+      return [];
+    }
+
+    const habits = JSON.parse(jsonValue);
+    for (habit of habits) {
+      habit.dates = habit.dates.map((date) => new Date(date));
+    }
+    return habits;
+
+  } catch (e) {
+    console.error(e);
+  }
+
+  return [];
+};
+
 const today = now();
 
 export default function App() {
   const [edit, setEdit] = useState(false);
   const [habit, setHabit] = useState();
-  const [habits, setHabits] = useState([
-    createHabit('Read a book'),
-    createHabit('Run'),
-    createHabit('Play Guitar'),
-  ]);
+  const [habits, setHabits] = useState([]);
+
+  useEffect(() => {
+    loadHabits().then(habits => { setHabits(habits); }).catch(e => console.error(e));
+  }, []);
 
   const addHabit = () => {
     Keyboard.dismiss();
@@ -49,13 +81,16 @@ export default function App() {
       Alert.alert("Whoops!", "Make sure to type the habit first");
       return;
     }
-    setHabits([...habits, createHabit(habit)]);
+    const newHabits = [...habits, createHabit(habit)];
+    saveHabits(newHabits);
+    setHabits(newHabits);
     setHabit(null);
   };
 
   const removeHabit = (index) => {
     let habitsCopy = [...habits];
     habitsCopy.splice(index, 1);
+    saveHabits(habitsCopy);
     setHabits(habitsCopy);
   };
 
@@ -67,6 +102,7 @@ export default function App() {
     } else {
       habitsCopy[index].dates.push(today);
     }
+    saveHabits(habitsCopy);
     setHabits(habitsCopy);
   };
 
