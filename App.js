@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, ScrollView, View, Pressable, TextInput, KeyboardAvoidingView, Keyboard, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
+import { Alert, StyleSheet, Text, ScrollView, View, Pressable, TextInput, KeyboardAvoidingView, Keyboard, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import Habit from './components/Habit';
 
 const createHabit = (text) => {
@@ -23,6 +23,10 @@ export default function App() {
 
   const addHabit = () => {
     Keyboard.dismiss();
+    if (habit === null) {
+      Alert.alert("Whoops!", "Make sure to type the habit first");
+      return;
+    }
     setHabits([...habits, createHabit(habit)]);
     setHabit(null);
   };
